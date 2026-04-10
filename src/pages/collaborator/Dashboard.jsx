@@ -86,7 +86,7 @@ export default function CollaboratorDashboard() {
           ⏰ Registro de Hoje
         </h2>
         {todayRecord ? (
-          <div className="grid grid-cols-4 gap-4 text-center">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
             <div>
               <p className="text-xs text-[var(--color-surface-300)] mb-1">Entrada</p>
               <p className="text-lg font-semibold text-white">{todayRecord.entrada || '--:--'}</p>

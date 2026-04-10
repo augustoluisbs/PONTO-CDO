@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { isAuthenticated, isAdmin, hasManagerAccess } from './services/auth';
 import Layout from './components/Layout';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import ClockIn from './pages/ClockIn';
 import Login from './pages/Login';
 import CollaboratorDashboard from './pages/collaborator/Dashboard';
@@ -27,6 +28,7 @@ function ProtectedRoute({ children, requireManager = false, requireAdmin = false
 export default function App() {
   return (
     <BrowserRouter>
+      <PWAInstallPrompt />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<ClockIn />} />
