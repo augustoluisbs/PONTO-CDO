@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { getCurrentUser } from '../../services/auth';
 import { query } from '../../services/storage';
 import { calculateDayMinutes, formatMinutes, calculateMonthSummary, getTodayStr } from '../../services/timeCalculations';
@@ -32,12 +33,12 @@ export default function CollaboratorDashboard() {
     if (!record) return null;
     switch (record.status) {
       case 'approved': return <span className="status-approved">🟢 Homologado</span>;
-      case 'pending': return <span className="status-pending">🟡 Pendente</span>;
+      case 'pending':  return <span className="status-pending">🟡 Pendente</span>;
       case 'rejected': return <span className="status-rejected">🔴 Ajuste</span>;
-      case 'absence': return <span className="status-rejected">❌ Falta</span>;
-      case 'holiday': return <span className="status-approved">🏖️ Feriado</span>;
-      case 'medical': return <span className="status-approved">🏥 Atestado</span>;
-      default: return <span className="status-pending">🟡 Pendente</span>;
+      case 'absence':  return <span className="status-rejected">❌ Falta</span>;
+      case 'holiday':  return <span className="status-approved">🏖️ Feriado</span>;
+      case 'medical':  return <span className="status-approved">🏥 Atestado</span>;
+      default:         return <span className="status-pending">🟡 Pendente</span>;
     }
   };
 
@@ -55,27 +56,27 @@ export default function CollaboratorDashboard() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-card text-center">
-          <p className="text-xs text-[var(--color-surface-300)] uppercase tracking-wider mb-2">Hoje</p>
-          <p className="text-2xl font-bold text-white">{formatMinutes(todayWorked)}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="glass-card text-center p-4">
+          <p className="text-xs text-[var(--color-surface-300)] uppercase tracking-wider mb-1">Hoje</p>
+          <p className="text-xl font-bold text-white">{formatMinutes(todayWorked)}</p>
           <p className="text-xs text-[var(--color-surface-300)] mt-1">trabalhadas</p>
         </div>
-        <div className="glass-card text-center">
-          <p className="text-xs text-[var(--color-surface-300)] uppercase tracking-wider mb-2">Mês</p>
-          <p className="text-2xl font-bold text-white">{formatMinutes(monthSummary?.totalWorked || 0)}</p>
+        <div className="glass-card text-center p-4">
+          <p className="text-xs text-[var(--color-surface-300)] uppercase tracking-wider mb-1">Mês</p>
+          <p className="text-xl font-bold text-white">{formatMinutes(monthSummary?.totalWorked || 0)}</p>
           <p className="text-xs text-[var(--color-surface-300)] mt-1">trabalhadas</p>
         </div>
-        <div className="glass-card text-center">
-          <p className="text-xs text-[var(--color-surface-300)] uppercase tracking-wider mb-2">Saldo</p>
-          <p className={`text-2xl font-bold ${(monthSummary?.balance || 0) >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
+        <div className="glass-card text-center p-4">
+          <p className="text-xs text-[var(--color-surface-300)] uppercase tracking-wider mb-1">Saldo</p>
+          <p className={`text-xl font-bold ${(monthSummary?.balance || 0) >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
             {formatMinutes(monthSummary?.balance || 0)}
           </p>
           <p className="text-xs text-[var(--color-surface-300)] mt-1">horas</p>
         </div>
-        <div className="glass-card text-center">
-          <p className="text-xs text-[var(--color-surface-300)] uppercase tracking-wider mb-2">Faltas</p>
-          <p className="text-2xl font-bold text-[var(--color-warning)]">{monthSummary?.absences || 0}</p>
+        <div className="glass-card text-center p-4">
+          <p className="text-xs text-[var(--color-surface-300)] uppercase tracking-wider mb-1">Faltas</p>
+          <p className="text-xl font-bold text-[var(--color-warning)]">{monthSummary?.absences || 0}</p>
           <p className="text-xs text-[var(--color-surface-300)] mt-1">no mês</p>
         </div>
       </div>
@@ -86,37 +87,58 @@ export default function CollaboratorDashboard() {
           ⏰ Registro de Hoje
         </h2>
         {todayRecord ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
-            <div>
-              <p className="text-xs text-[var(--color-surface-300)] mb-1">Entrada</p>
-              <p className="text-lg font-semibold text-white">{todayRecord.entrada || '--:--'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-[var(--color-surface-300)] mb-1">Alm. Saída</p>
-              <p className="text-lg font-semibold text-white">{todayRecord.almoco_ida || '--:--'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-[var(--color-surface-300)] mb-1">Alm. Retorno</p>
-              <p className="text-lg font-semibold text-white">{todayRecord.almoco_volta || '--:--'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-[var(--color-surface-300)] mb-1">Saída</p>
-              <p className="text-lg font-semibold text-white">{todayRecord.saida || '--:--'}</p>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            {[
+              { label: 'Entrada',      value: todayRecord.entrada },
+              { label: 'Alm. Saída',   value: todayRecord.almoco_ida },
+              { label: 'Alm. Retorno', value: todayRecord.almoco_volta },
+              { label: 'Saída',        value: todayRecord.saida },
+            ].map(({ label, value }) => (
+              <div key={label} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                <p className="text-xs text-[var(--color-surface-300)] mb-1">{label}</p>
+                <p className="text-base font-semibold text-white">{value || '--:--'}</p>
+              </div>
+            ))}
           </div>
         ) : (
           <p className="text-[var(--color-surface-300)] text-sm">
-            Nenhum registro hoje. <a href="/registrar" className="text-[var(--color-brand-400)] hover:underline">Registrar agora →</a>
+            Nenhum registro hoje.{' '}
+            <Link to="/registrar" className="text-[var(--color-brand-400)] hover:underline">
+              Registrar agora →
+            </Link>
           </p>
         )}
       </div>
 
-      {/* Recent Records */}
+      {/* Recent Records — card list on mobile, table on lg */}
       <div className="glass-card-static">
         <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           📋 Últimos Registros
         </h2>
-        <div className="table-container">
+
+        {/* Mobile cards */}
+        <div className="lg:hidden space-y-2">
+          {recentRecords.map(r => (
+            <div key={r.id} className="rounded-xl p-3 flex items-center justify-between gap-2"
+              style={{ background: 'rgba(255,255,255,0.04)' }}>
+              <div>
+                <p className="text-sm font-medium text-white">
+                  {new Date(r.date + 'T12:00:00').toLocaleDateString('pt-BR')}
+                </p>
+                <p className="text-xs text-[var(--color-surface-300)] mt-0.5">
+                  {r.entrada || '--:--'} → {r.saida || '--:--'} · {formatMinutes(calculateDayMinutes(r))}
+                </p>
+              </div>
+              <div className="shrink-0">{getStatusBadge(r)}</div>
+            </div>
+          ))}
+          {recentRecords.length === 0 && (
+            <p className="text-center text-[var(--color-surface-300)] py-4 text-sm">Nenhum registro encontrado</p>
+          )}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden lg:block table-container">
           <table>
             <thead>
               <tr>
@@ -152,7 +174,7 @@ export default function CollaboratorDashboard() {
         <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           📊 Horas da Semana
         </h2>
-        <div className="flex items-end gap-2 h-32">
+        <div className="flex items-end gap-2 h-28">
           {recentRecords.slice(0, 5).reverse().map((r, i) => {
             const worked = calculateDayMinutes(r);
             const expected = (user.dailyHours || 8) * 60;
@@ -160,7 +182,7 @@ export default function CollaboratorDashboard() {
             const dayLabel = new Date(r.date + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short' });
             return (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <span className="text-xs text-[var(--color-surface-300)]">{formatMinutes(worked)}</span>
+                <span className="text-xs text-[var(--color-surface-300)] hidden sm:block">{formatMinutes(worked)}</span>
                 <div className="w-full rounded-t-lg transition-all duration-500"
                   style={{
                     height: `${pct}%`,

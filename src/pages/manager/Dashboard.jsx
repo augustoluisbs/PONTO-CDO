@@ -146,34 +146,51 @@ export default function ManagerDashboard() {
       <div className="glass-card-static">
         <h2 className="text-lg font-semibold text-white mb-4">🟡 Registros Pendentes</h2>
         {pendingList.length > 0 ? (
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Colaborador</th>
-                  <th>Data</th>
-                  <th>Entrada</th>
-                  <th>Saída</th>
-                  <th>Trabalhadas</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingList.map(r => (
-                  <tr key={r.id}>
-                    <td className="text-white font-medium">{r.userName}</td>
-                    <td>{new Date(r.date + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
-                    <td>{r.entrada || '--:--'}</td>
-                    <td>{r.saida || '--:--'}</td>
-                    <td className="font-medium text-white">{formatMinutes(calculateDayMinutes(r))}</td>
+          <>
+            {/* Mobile cards */}
+            <div className="lg:hidden space-y-2">
+              {pendingList.map(r => (
+                <div key={r.id} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <p className="text-sm font-semibold text-white">{r.userName}</p>
+                  <p className="text-xs text-[var(--color-surface-300)] mt-1">
+                    📅 {new Date(r.date + 'T12:00:00').toLocaleDateString('pt-BR')}
+                    &nbsp;·&nbsp; {r.entrada || '--:--'} → {r.saida || '--:--'}
+                    &nbsp;·&nbsp; {formatMinutes(calculateDayMinutes(r))}
+                  </p>
+                </div>
+              ))}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden lg:block table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Colaborador</th>
+                    <th>Data</th>
+                    <th>Entrada</th>
+                    <th>Saída</th>
+                    <th>Trabalhadas</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {pendingList.map(r => (
+                    <tr key={r.id}>
+                      <td className="text-white font-medium">{r.userName}</td>
+                      <td>{new Date(r.date + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
+                      <td>{r.entrada || '--:--'}</td>
+                      <td>{r.saida || '--:--'}</td>
+                      <td className="font-medium text-white">{formatMinutes(calculateDayMinutes(r))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         ) : (
           <p className="text-[var(--color-surface-300)] text-sm">Nenhum registro pendente ✅</p>
         )}
       </div>
+
     </div>
   );
 }
