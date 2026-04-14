@@ -17,6 +17,7 @@ import MonthlyReport from './pages/manager/MonthlyReport';
 import AuditLog from './pages/manager/AuditLog';
 import VacationManagement from './pages/manager/VacationManagement';
 import AdminPanel from './pages/admin/AdminPanel';
+import UserProfile from './pages/collaborator/UserProfile';
 
 function ProtectedRoute({ children, requireManager = false, requireAdmin = false }) {
   if (!isAuthenticated()) return <Navigate to="/login" replace />;
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/comprovantes" element={<Receipts />} />
           <Route path="/justificativas" element={<Justifications />} />
           <Route path="/ferias" element={<VacationRequest />} />
+          <Route path="/perfil" element={<UserProfile />} />
         </Route>
 
         {/* Manager routes (accessible by both manager AND admin) */}

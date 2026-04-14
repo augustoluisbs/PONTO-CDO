@@ -100,16 +100,21 @@ export default function Layout() {
         </nav>
 
         <div className="p-4 border-t border-white/5">
-          <div className="flex items-center gap-3 px-3 mb-3">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white"
+          <button
+            onClick={() => navigate('/perfil')}
+            className="w-full flex items-center gap-3 px-3 mb-3 rounded-xl py-2 transition-all hover:bg-white/5 text-left"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}
+          >
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
               style={{ background: avatarGradient }}>
               {user?.name?.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-              <p className="text-xs text-[var(--color-surface-300)] truncate">{user?.email}</p>
+              <p className="text-xs text-[var(--color-surface-300)] truncate">{user?.matricula || user?.email}</p>
             </div>
-          </div>
+            <span className="text-xs text-[var(--color-surface-300)]">👤</span>
+          </button>
           <button onClick={handleLogout} className="w-full btn-secondary text-sm">
             Sair
           </button>
@@ -126,15 +131,26 @@ export default function Layout() {
         <h1 className="text-xl font-bold bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-brand-300)] bg-clip-text text-transparent">
           PontoFlow
         </h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {isAdmin() && (
             <span className="text-xs font-bold px-2 py-0.5 rounded-full"
               style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171' }}>
               ADMIN
             </span>
           )}
-          <span className="text-sm text-[var(--color-surface-300)]">{user?.name?.split(' ')[0]}</span>
-          <button onClick={handleLogout} className="text-[var(--color-surface-300)] hover:text-white text-sm">
+          <button
+            onClick={() => navigate('/perfil')}
+            className="flex items-center gap-1.5"
+            style={{ background: 'none', border: 'none', minHeight: 'auto', cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }}
+          >
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+              style={{ background: avatarGradient }}>
+              {user?.name?.charAt(0)}
+            </div>
+            <span className="text-sm text-[var(--color-surface-300)]">{user?.name?.split(' ')[0]}</span>
+          </button>
+          <button onClick={handleLogout} className="text-[var(--color-surface-300)] hover:text-white text-sm"
+            style={{ background: 'none', border: 'none', minHeight: 'auto', padding: '4px 8px', cursor: 'pointer' }}>
             Sair
           </button>
         </div>

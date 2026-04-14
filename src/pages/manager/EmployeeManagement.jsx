@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { getCurrentUser, isAdmin } from '../../services/auth';
+import { getCurrentUser, isAdmin, setPasswordByManager, validatePassword } from '../../services/auth';
 import { add, update, generateId, query } from '../../services/storage';
 import { getManagerCollaborators, getAllCompanies } from '../../services/companyService';
 
@@ -17,6 +17,12 @@ export default function EmployeeManagement() {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Unlock modal
+  const [unlockTarget, setUnlockTarget] = useState(null);
+  const [unlockPw, setUnlockPw] = useState('');
+  const [unlockError, setUnlockError] = useState('');
+  const [unlockSuccess, setUnlockSuccess] = useState('');
 
   const companies = useMemo(() => getAllCompanies(), []);
 
@@ -73,6 +79,24 @@ export default function EmployeeManagement() {
     reload();
   };
 
+  const openUnlock = (emp) => {
+    setUnlockTarget(emp);
+    setUnlockPw('');
+    setUnlockError('');
+    setUnlockSuccess('');
+  };
+
+  const handleUnlock = (e) => {
+    e.preventDefault();
+    setUnlockError('');
+    const err = validatePassword(unlockPw);
+    if (err) { setUnlockError(err); return; }
+    const result = setPasswordByManager(unlockTarget.id, unlockPw);
+    if (!result.success) { setUnlockError(result.error); return; }
+    setUnlockSuccess('✅ Conta desbloqueada! Senha temporária definida. O usuário deverá alterá-la no próximo login.');
+    reload();
+  };
+
   const getPeriodLabel = (p) => {
     switch (p) {
       case 'integral': return '🕐 Integral';
@@ -110,9 +134,9 @@ export default function EmployeeManagement() {
         {employees.map(emp => (
           <div key={emp.id} className={`glass-card-static transition-opacity ${emp.active === false ? 'opacity-50' : ''}`}>
             <div className="flex items-start justify-between">
-              <div>
+              <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-brand-500)] to-[var(--color-brand-700)] flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-brand-500)] to-[var(--color-brand-700)] flex items-center justify-center text-white font-bold text-sm shrink-0">
                     {emp.name?.charAt(0)}
                   </div>
                   <div>
@@ -126,12 +150,23 @@ export default function EmployeeManagement() {
                   <p>{getPeriodLabel(emp.period)}</p>
                 </div>
               </div>
-              <span className={emp.active !== false ? 'status-approved' : 'status-rejected'}>
-                {emp.active !== false ? 'Ativo' : 'Inativo'}
-              </span>
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <span className={emp.active !== false ? 'status-approved' : 'status-rejected'}>
+                  {emp.active !== false ? 'Ativo' : 'Inativo'}
+                </span>
+                {emp.accountLocked && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-danger)]/15 text-[var(--color-danger)] font-medium">🔒 Bloqueada</span>
+                )}
+                {emp.mustChangePassword && !emp.accountLocked && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-warning)]/15 text-[var(--color-warning)] font-medium">🔑 Troca pend.</span>
+                )}
+              </div>
             </div>
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-4 flex-wrap">
               <button onClick={() => openEdit(emp)} className="btn-secondary text-xs flex-1">✏️ Editar</button>
+              {emp.accountLocked && (
+                <button onClick={() => openUnlock(emp)} className="btn-warning text-xs flex-1">🔓 Desbloquear</button>
+              )}
               <button
                 onClick={() => toggleActive(emp)}
                 className={emp.active !== false ? 'btn-danger text-xs flex-1' : 'btn-success text-xs flex-1'}
@@ -250,6 +285,56 @@ export default function EmployeeManagement() {
                 <button type="submit" className="btn-primary flex-1">Salvar</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Unlock Modal */}
+      {unlockTarget && (
+        <div className="modal-overlay" onPointerDown={() => { setUnlockTarget(null); }}>
+          <div className="modal-content" onPointerDown={e => e.stopPropagation()}>
+            <h2 className="text-xl font-bold text-white mb-1">🔓 Desbloquear Conta</h2>
+            <p className="text-sm text-[var(--color-surface-300)] mb-6">
+              Defina uma senha temporária para <strong className="text-white">{unlockTarget.name}</strong>.
+              O usuário será obrigado a alterá-la no próximo login.
+            </p>
+
+            {unlockSuccess ? (
+              <div className="space-y-4">
+                <div className="text-sm px-4 py-3 rounded-xl"
+                  style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', color: '#6ee7b7' }}>
+                  {unlockSuccess}
+                </div>
+                <button onClick={() => setUnlockTarget(null)} className="btn-primary w-full">Fechar</button>
+              </div>
+            ) : (
+              <form onSubmit={handleUnlock} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-[var(--color-surface-300)] mb-2">Nova Senha Temporária</label>
+                  <input
+                    type="text"
+                    value={unlockPw}
+                    onChange={e => setUnlockPw(e.target.value)}
+                    className="input-field"
+                    placeholder="4 a 10 caracteres"
+                    maxLength={10}
+                    required
+                    autoFocus
+                  />
+                  <p className="text-xs text-[var(--color-surface-300)] mt-1">Mínimo 4, máximo 10 caracteres</p>
+                </div>
+                {unlockError && (
+                  <div className="text-sm px-4 py-3 rounded-xl"
+                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
+                    {unlockError}
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setUnlockTarget(null)} className="btn-secondary flex-1">Cancelar</button>
+                  <button type="submit" className="btn-primary flex-1">🔓 Desbloquear</button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
