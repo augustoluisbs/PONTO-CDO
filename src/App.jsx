@@ -18,6 +18,8 @@ import AuditLog from './pages/manager/AuditLog';
 import VacationManagement from './pages/manager/VacationManagement';
 import AdminPanel from './pages/admin/AdminPanel';
 import UserProfile from './pages/collaborator/UserProfile';
+import HourBank from './pages/collaborator/HourBank';
+import OvertimeManagement from './pages/manager/OvertimeManagement';
 
 function ProtectedRoute({ children, requireManager = false, requireAdmin = false }) {
   if (!isAuthenticated()) return <Navigate to="/login" replace />;
@@ -44,6 +46,7 @@ export default function App() {
           <Route path="/justificativas" element={<Justifications />} />
           <Route path="/ferias" element={<VacationRequest />} />
           <Route path="/perfil" element={<UserProfile />} />
+          <Route path="/banco-horas" element={<HourBank />} />
         </Route>
 
         {/* Manager routes (accessible by both manager AND admin) */}
@@ -54,6 +57,7 @@ export default function App() {
           <Route path="/gestor/relatorios" element={<MonthlyReport />} />
           <Route path="/gestor/auditoria" element={<AuditLog />} />
           <Route path="/gestor/ferias" element={<VacationManagement />} />
+          <Route path="/gestor/banco-horas" element={<OvertimeManagement />} />
         </Route>
 
         {/* Admin-only routes */}
